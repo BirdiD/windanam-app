@@ -24,7 +24,7 @@ url = "https://join.slack.com/t/cawoylel/shared_invite/zt-27j4yeoc6-Lm9vptVwjIKq
 if st.session_state.language == "French":
     show_pages(
         [
-            Page("Hello.py", "Accueil", "🏠"),
+            Page("home.py", "Accueil", "🏠"),
             Page("src/pages/speech_recognition.py", "Windanam - Reconnaissance vocale", "🗣️"),
             # Page("src/pages/translatation.py", "Translation", "🌐"),
         ]
@@ -45,7 +45,7 @@ if st.session_state.language == "French":
 else:
     show_pages(
         [
-            Page("Hello.py", "About", "🏠"),
+            Page("home.py", "About", "🏠"),
             Page("src/pages/speech_recognition.py", "Windanam - Speech Recognition", "🗣️"),
             # Page("src/pages/translatation.py", "Translation", "🌐"),
         ]

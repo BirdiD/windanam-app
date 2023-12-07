@@ -49,7 +49,7 @@ def upload_to_drive(audio, drive_folder_id="1bkxELyDOA98Ok5uZP3Q0yBoMFE4jy0q5"):
     file_metadata = {'name': filename, 'parents': [drive_folder_id]}
     media = MediaIoBaseUpload(io.BytesIO(audio), mimetype='audio/wav')
     service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-    
+
 add_page_title() 
 
 if "transcription" not in st.session_state:
@@ -130,7 +130,7 @@ def main():
         with st.container():
           st.info(st.session_state.mapping[st.session_state.language]["info_output"], icon="ℹ️") 
           if button(st.session_state.mapping[st.session_state.language]["authorize_button"], key="saved"):
-            #upload_to_drive(wav_audio_data)
+            upload_to_drive(wav_audio_data)
             #Display a message indicating successful upload
             st.success(st.session_state.mapping[st.session_state.language]["result_saved"])
 

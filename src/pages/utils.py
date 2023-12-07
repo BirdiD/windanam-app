@@ -22,17 +22,6 @@ def authenticate():
     credentials = ServiceAccountCredentials.from_json_keyfile_name(token_path, scope)
     return build('drive', 'v3', credentials=credentials)
 
-# def upload_audio_to_drive(audio_data, filename):
-#     """
-#     Uploads the audio data to Google Drive with the specified filename
-#     """
-#     drive = authenticate()
-#     file_metadata = {'name': filename}
-#     media_content = {'mimeType': 'audio/wav'}
-#     media_body = MediaBody(audio_data, media_content)
-
-#     file = drive.files().create(body=file_metadata, media_body=media_body).execute()
-#     return file['id']
 
 def generate_unique_filename():
     """

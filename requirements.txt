@@ -1,5 +1,12 @@
-altair
-numpy
-pandas
-pydeck
 streamlit
+st-pages 
+streamlit-extras
+streamlit-audiorec
+google-api-python-client
+google-auth 
+google-auth-oauthlib 
+google-auth-httplib2 
+oauth2client
+torch >= 1.5
+torchaudio
+transformers

@@ -1,84 +1,101 @@
-# Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-from typing import Any
-
-import numpy as np
-
 import streamlit as st
-from streamlit.hello.utils import show_code
+from st_pages import add_page_title, hide_pages
+from st_audiorec import st_audiorec
+from streamlit_extras.stateful_button import button
+import time
+import utils.upload_to_drive as upload_to_drive
+
+import torch
+from transformers import pipeline
+
+add_page_title() 
+
+if "transcription" not in st.session_state:
+    st.session_state.transcription = None
+
+if "audio" not in st.session_state:
+    st.session_state.audio = None
+
+st.session_state.mapping = {"French" : {"ressource_spinner" : "Téléchargement du modèle de reconnaisance vocale", 
+                                        "transcribe" : "Exécution du modèle. Cela peut prendre un certain temps", 
+                                        "fetching_output" : "Fetching output",
+                                        "output_label" : "Sortie du modèle",
+                                        "info_output" : "Pour nous aider à améliorer le modèle, vous pouvez cliquez sur le bouton ci-dessous afin de nous autoriser à utiliser vos enregistrements?",
+                                        "authorize_button" : "Autoriser l'utilisation de mes enregistrements",
+                                        "result_saved" : "Votre enregistrement a été bien pris en compte pour améliorer le modèle. Merci !",
+                                        "info_recording" : "Assurez-vous de vous être bien enregistré en cliquant sur le bouton Start Recording. Une fois enregistré, vous pourrez l'écouter. Attendez quelques secondes pour que le bouton Transcrire apparaisse. Cliquez dessus et attendez la sortie"
+                                        },
+
+"English" : {"ressource_spinner" : "Downloading model from Hugging Face...", 
+            "transcribe":"Running model. This can take some some time",
+            "fetching_output" : "Récupération des résultats",
+            "output_label" : "Model Output",
+            "info_output" : "The results might not be perfect yet. In order to improve the model, would you allow us to use your recordings? If yes, click on the button below",
+            "authorize_button" : "Allow my recordings to be used",
+            "result_saved" : "Your recording has been saved to improve the model. Thanks a lot!",
+            "info_recording" : "Make sure you have recorded yourself by clicking on Start Start Recording button. Once recorded, you will be able to listen to the recording. Wait some seconds for the Transcribe button to appear. Click on it and wait for the output"
+            }
+}  
+if st.session_state.language == "French":
+  st.markdown(
+        """
+        **Windanam** est le premier modèle de reconnaissance vocale multidialectale de Cawoylel.
+        Comme tous les systèmes d'intelligence artificielle, il existe des risques que le modèle mal interprète ce que veut dire une personne ou produise des résultats inexacts.
+        Nous vous encourageons à le tester et à nous faire vos retours afin de l'améliorer.
+    """
+    )
+else: 
+  st.markdown(
+      """
+      **Windanam** is Cawoylel's first multidialectal speech recognition model. 
+      As with all AI systems, there are inherent risks that the model coud mis-transcribe what a person wants to say, or generate inaccurate outputs.
+      We encourage you to test it and provides us some feedbacks on the model outputs.
+  """
+  )
 
 
-def animation_demo() -> None:
+@st.cache_resource(show_spinner=st.session_state.mapping[st.session_state.language]["ressource_spinner"])
+def load_model(model_name = "cawoylel/windanam_mms-1b-tts_v2"):
+  """
+  Function to load model from hugging face
+  """
+  pipe = pipeline("automatic-speech-recognition", model=model_name)
+  return pipe
 
-    # Interactive Streamlit elements, like these sliders, return their value.
-    # This gives you an extremely simple interaction model.
-    iterations = st.sidebar.slider("Level of detail", 2, 20, 10, 1)
-    separation = st.sidebar.slider("Separation", 0.7, 2.0, 0.7885)
+pipeline = load_model()
 
-    # Non-interactive elements return a placeholder to their location
-    # in the app. Here we're storing progress_bar to update it later.
-    progress_bar = st.sidebar.progress(0)
+st.cache_data(show_spinner=st.session_state.mapping[st.session_state.language]["transcribe"])
+def transcribe_audio(sample):
+  """
+  Transcribe audio
+  """
+  transcription = pipeline(sample)
+  return transcription["text"]
 
-    # These two elements will be filled in later, so we create a placeholder
-    # for them using st.empty()
-    frame_text = st.sidebar.empty()
-    image = st.empty()
+def main():
+    """
+    Main function to record audio from browser
+    """
+    wav_audio_data = st_audiorec()
+    if wav_audio_data is not None:
+      st.session_state.audio = wav_audio_data
+      if button("Transcribe", key="transcribe"):
+        st.session_state.transcription = transcribe_audio(st.session_state.audio)
+        with st.spinner(st.session_state.mapping[st.session_state.language]["fetching_output"]):
+            st.text_area(label = st.session_state.mapping[st.session_state.language]["output_label"], 
+                             value=st.session_state.transcription, height = 100)
+                
+        with st.container():
+          st.info(st.session_state.mapping[st.session_state.language]["info_output"], icon="ℹ️") 
+          if button(st.session_state.mapping[st.session_state.language]["authorize_button"], key="saved"):
+            #upload_to_drive(wav_audio_data)
+            #Display a message indicating successful upload
+            st.success(st.session_state.mapping[st.session_state.language]["result_saved"])
 
-    m, n, s = 960, 640, 400
-    x = np.linspace(-m / s, m / s, num=m).reshape((1, m))
-    y = np.linspace(-n / s, n / s, num=n).reshape((n, 1))
-
-    for frame_num, a in enumerate(np.linspace(0.0, 4 * np.pi, 100)):
-        # Here were setting value for these two elements.
-        progress_bar.progress(frame_num)
-        frame_text.text("Frame %i/100" % (frame_num + 1))
-
-        # Performing some fractal wizardry.
-        c = separation * np.exp(1j * a)
-        Z = np.tile(x, (n, 1)) + 1j * np.tile(y, (1, m))
-        C = np.full((n, m), c)
-        M: Any = np.full((n, m), True, dtype=bool)
-        N = np.zeros((n, m))
-
-        for i in range(iterations):
-            Z[M] = Z[M] * Z[M] + C[M]
-            M[np.abs(Z) > 2] = False
-            N[M] = i
-
-        # Update the image placeholder by calling the image() function on it.
-        image.image(1.0 - (N / N.max()), use_column_width=True)
-
-    # We clear elements by calling empty on them.
-    progress_bar.empty()
-    frame_text.empty()
-
-    # Streamlit widgets automatically run the script from top to bottom. Since
-    # this button is not connected to any other logic, it just causes a plain
-    # rerun.
-    st.button("Re-run")
+                
+    else:
+      st.info(st.session_state.mapping[st.session_state.language]["info_recording"])
 
 
-st.set_page_config(page_title="Animation Demo", page_icon="📹")
-st.markdown("# Animation Demo")
-st.sidebar.header("Animation Demo")
-st.write(
-    """This app shows how you can use Streamlit to build cool animations.
-It displays an animated fractal based on the the Julia Set. Use the slider
-to tune different parameters."""
-)
-
-animation_demo()
-
-show_code(animation_demo)
+if __name__ == "__main__":
+    main()

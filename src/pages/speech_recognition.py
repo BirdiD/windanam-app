@@ -58,6 +58,9 @@ if "transcription" not in st.session_state:
 if "audio" not in st.session_state:
     st.session_state.audio = None
 
+if "language" not in st.session_state:
+    st.session_state.language = "English"
+    
 st.session_state.mapping = {"French" : {"ressource_spinner" : "Téléchargement du modèle de reconnaisance vocale", 
                                         "transcribe" : "Exécution du modèle. Cela peut prendre un certain temps", 
                                         "fetching_output" : "Fetching output",

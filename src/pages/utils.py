@@ -39,13 +39,14 @@ def generate_unique_filename():
     Generate a unique filename with a timestamp.
     """
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    return f"{str(uuid.uuid4())}_{timestamp}.wav", f"{str(uuid.uuid4())}_{timestamp}.txt"
+    myid = f"{str(uuid.uuid4())}_{timestamp}"
+    return f"{myid}.wav", f"{myid}.txt"
 
 
 
 def upload_to_drive(audio, text="Neddo ko banndum", audio_folder_id="1bkxELyDOA98Ok5uZP3Q0yBoMFE4jy0q5", text_folder_id = "1r0ksPIs8ooe2mpm3-WvK9iQBTaybYojg"):
     """
-    Upload the audio bytes  and text to Google Drive.
+    Upload recorded audio and text to Google Drive.
     Params:
         audio : Recorded audio from browser
         text : Model transcription

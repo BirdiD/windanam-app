@@ -9,17 +9,18 @@ from google.oauth2 import service_account
 import datetime
 import io
 import json
+import uuid
+import streamlit as st
 
-current_dir = os.getcwd()
 
 
 def authenticate():
     #token_path = os.path.join(current_dir, 'src/creds', 'credentials.json')
     scope = 'https://www.googleapis.com/auth/drive'
     # Fetch Google Cloud credentials from GitHub secret
-    credentials_json = os.environ['GOOGLE_DRIVE_CREDENTIALS']
+    credentials_json = st.secrets['credentials']
     if not credentials_json:
-        raise ValueError("ENV_SECRET environment variable is not set.")
+        raise ValueError("credentials environment variable is not set.")
 
     try:
         credentials_dict = json.loads(credentials_json)
@@ -30,13 +31,14 @@ def authenticate():
     credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
     return build('drive', 'v3', credentials=credentials)
 
-
 def generate_unique_filename():
     """
     Generate a unique filename with a timestamp.
     """
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    return f"recorded_audio_{timestamp}.wav"
+    return f"{str(uuid.uuid4())}_{timestamp}.wav"
+
+
 
 def upload_to_drive(audio, drive_folder_id="1bkxELyDOA98Ok5uZP3Q0yBoMFE4jy0q5"):
     """

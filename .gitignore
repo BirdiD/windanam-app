@@ -122,6 +122,8 @@ celerybeat.pid
 # Environments
 # src/creds
 # .src/creds/
+
+.streamlit/secrets.toml
 .env
 .venv
 env/

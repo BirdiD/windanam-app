@@ -82,14 +82,14 @@ def main():
       st.audio(st.session_state.audio.export().read())
       st.session_state.audio.export("audio.wav", format="wav")
       
-      if button(st.session_state.mapping[st.session_state.language]["authorize_button"], key="saved"):
-        try:
-          with st.spinner("Saving audio"):
-            upload_to_drive(st.session_state.audio.export().read())
-            st.success(st.session_state.mapping[st.session_state.language]["result_saved"])
+      # if button(st.session_state.mapping[st.session_state.language]["authorize_button"], key="saved"):
+      #   try:
+      #     with st.spinner("Saving audio"):
+      #       upload_to_drive(st.session_state.audio.export().read())
+      #       st.success(st.session_state.mapping[st.session_state.language]["result_saved"])
 
-        except:
-          st.warning(consent_message[st.session_state.language], icon="⚠️")
+      #   except:
+      #     st.warning(consent_message[st.session_state.language], icon="⚠️")
                 
     else:
       st.info(st.session_state.mapping[st.session_state.language]["info_recording"])
